@@ -1,3 +1,11 @@
+
+bin/drivers/*
+bin/*.png
+desktop.ini
+pdm.lock
+.pdm.toml
+drivers/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
