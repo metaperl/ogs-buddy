@@ -83,7 +83,7 @@ element.parentNode.removeChild(element);
     def move_next_to_browser(self, window):
         window_size = self.driver.get_window_size()
         logger.debug(f"{window_size=}")
-        window.move(window_size['width'], 0)
+        window.move(window_size['width'], 300)
 
 
 
