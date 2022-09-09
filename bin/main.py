@@ -101,7 +101,7 @@ element.parentNode.removeChild(element);
             _ = os.path.join(TEMP_DIR, filename_from_url(self.driver.current_url, append=f"{side}.png"))
             card[side]['image'] = _
             if side == 'back':
-                card[side]['text'] = f'<a href="{self.driver.current_url}">self.driver.current_url</a>'
+                card[side]['text'] = f'<a href="{self.driver.current_url}">{self.driver.current_url}</a>'
             logger.debug(_)
             self.driver.save_screenshot(_)
             self.toggle_ai()
