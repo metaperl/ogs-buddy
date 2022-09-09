@@ -21,6 +21,7 @@ from traitlets import HasTraits, Int, Unicode, default, Any
 import PySimpleGUI as sg
 
 
+DECK_NAME = 'ogs-buddy'
 TEMP_DIR = tempfile.mkdtemp()
 
 def move_upper_right(window):
@@ -60,6 +61,9 @@ class OGS(HasTraits):
     def begin(self):
         self.driver.get(self.url)
         self.remove_ogs_logo()
+        logger.info("The Anki app must be up and running with anki-connect plugin for OGS Buddy to work its magic.")
+        self.create_deck()
+
 
     @property
     def action_chains(self):
@@ -76,6 +80,9 @@ element.parentNode.removeChild(element);
         actions = self.action_chains
         actions.send_keys('I')
         actions.perform()
+
+    def create_deck(self):
+        ogs_buddy.anki_connect.create_deck(DECK_NAME)
 
     def make_flashcard(self):
         card = {
@@ -94,7 +101,7 @@ element.parentNode.removeChild(element);
             _ = os.path.join(TEMP_DIR, filename_from_url(self.driver.current_url, append=f"{side}.png"))
             card[side]['image'] = _
             if side == 'back':
-                card[side]['text'] = self.driver.current_url
+                card[side]['text'] = f'<a href="{self.driver.current_url}">self.driver.current_url</a>'
             logger.debug(_)
             self.driver.save_screenshot(_)
             self.toggle_ai()
@@ -103,6 +110,7 @@ element.parentNode.removeChild(element);
         logger.debug(f"The extracted and generated {card=}   ")
 
         ogs_buddy.anki_connect.make_card(
+            DECK_NAME,
             card['front']['text'],
             card['back']['text'],
             card['front']['image'],

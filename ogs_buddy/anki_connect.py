@@ -4,6 +4,7 @@ import urllib.request
 from loguru import logger
 import os.path
 
+
 def request(action, **params):
     return {'action': action, 'params': params, 'version': 6}
 
@@ -20,10 +21,15 @@ def invoke(action, **params):
         raise Exception(response['error'])
     return response
 
-def make_card(front_text, back_text, front_image, back_image):
+def create_deck(deck_name):
+    invoke('createDeck', deck=deck_name)
+    result = invoke('deckNames')
+    print('got list of decks: {}'.format(result))
+
+def make_card(deck_name, front_text, back_text, front_image, back_image):
     parms = {
         "note": {
-            "deckName": "ogs-buddy",
+            "deckName": deck_name,
             "modelName": "Basic",
             "fields": {
                 "Front": f"{front_text}\n\n",
