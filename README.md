@@ -15,8 +15,10 @@ Let's click on "Make Flashcard" so we dont make this same mistake again.
 ## Anki quizzes us on the position:
 
 ![Now we are presented with the position in a flashcard](https://i.imgur.com/iJWkKYD.png)
+Now we are presented with the position in a flashcard
 
-![After pressing "show answer" we see the answer and can feedback on how well we did](![image](https://user-images.githubusercontent.com/21293/189311588-c62bd4b6-e3c5-46dd-bff8-e5eeddfcfd30.png)
+![After pressing "show answer" we see the answer and can feedback on how well we did](https://user-images.githubusercontent.com/21293/189311588-c62bd4b6-e3c5-46dd-bff8-e5eeddfcfd30.png)
+After pressing "show answer" we see the answer and can feedback on how well we did
 
 
 # References
