@@ -1,5 +1,8 @@
 import json
+from operator import inv
 import urllib.request
+from loguru import logger
+import os.path
 
 def request(action, **params):
     return {'action': action, 'params': params, 'version': 6}
@@ -15,5 +18,95 @@ def invoke(action, **params):
         raise Exception('response is missing required result field')
     if response['error'] is not None:
         raise Exception(response['error'])
-    return response['result']
+    return response
+
+def make_card(front_text, back_text, front_image, back_image):
+    parms = {
+        "note": {
+            "deckName": "ogs-buddy",
+            "modelName": "Basic",
+            "fields": {
+                "Front": f"{front_text}\n\n",
+                "Back": f"{back_text}\n\n"
+            },
+            "options": {
+                "allowDuplicate": False,
+                "duplicateScope": "deck",
+                "duplicateScopeOptions": {
+                    "deckName": "Default",
+                    "checkChildren": False,
+                    "checkAllModels": False
+                }
+            },
+            "tags": [
+                "ogs-buddy-tag"
+            ],
+            "picture": [
+                {
+                "path": front_image,
+                "filename": os.path.basename(front_image),
+                "fields": [
+                    "Front"
+                ]
+                },
+                {
+                "path": back_image,
+                "filename": os.path.basename(back_image),
+                "fields": [
+                    "Back"
+                ]
+                }
+            ]
+        }
+    }
+
+    logger.debug(f"{parms=}")
+    result = invoke('addNote', **parms)
+    logger.debug(f"Result of addNote: {result=}")
     
+    
+def test_1():
+    parms = {
+        "note": {
+            "deckName": "ogs-buddy",
+            "modelName": "Basic",
+            "fields": {
+                "Front": "front content",
+                "Back": "back content"
+            },
+            "options": {
+                "allowDuplicate": False,
+                "duplicateScope": "deck",
+                "duplicateScopeOptions": {
+                    "deckName": "Default",
+                    "checkChildren": False,
+                    "checkAllModels": False
+                }
+            },
+            "tags": [
+                "ogs-buddy-tag"
+            ],
+            "picture": [{
+                "url": "https://en.wikipedia.org/wiki/Go_(game)#/media/File:FloorGoban.JPG",
+                "filename": "floor-goban.jpg",
+                "fields": [
+                    "Front"
+                ]
+            }],
+            "picture": [{
+                "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/A_black_cat_named_Tilly.jpg/220px-A_black_cat_named_Tilly.jpg",
+                "filename": "black_cat.jpg",
+                "fields": [
+                    "Back"
+                ]
+            }]
+        }
+    }
+
+    result = invoke('addNote', **parms)
+    logger.debug(f"{result=}")
+
+
+if __name__ == '__main__':
+    print('main')
+    test_1()

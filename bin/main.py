@@ -4,9 +4,13 @@ from weakref import finalize
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+import tempfile
+
+import os.path
 
 import time
 from loguru import logger
+import ogs_buddy.anki_connect
 
 from PIL import Image
 
@@ -16,6 +20,8 @@ from autoselenium import Driver
 from traitlets import HasTraits, Int, Unicode, default, Any    
 import PySimpleGUI as sg
 
+
+TEMP_DIR = tempfile.mkdtemp()
 
 def move_upper_right(window):
     screen_width, screen_height = window.get_screen_dimensions()
@@ -72,13 +78,36 @@ element.parentNode.removeChild(element);
         actions.perform()
 
     def make_flashcard(self):
-        for side in "front back".split():
+        card = {
+            'front': {
+                'text': '?',
+                'image': '?',
+            },
+            'back': {
+                'text': '',
+                 'image': '?',
+            }
+        }
+        for side in "back front".split():
             current_url=self.driver.current_url
             logger.debug(f"{current_url=}")
-            filename = filename_from_url(self.driver.current_url, append=f"{side}.png")
-            logger.debug(filename)
+            _ = os.path.join(TEMP_DIR, filename_from_url(self.driver.current_url, append=f"{side}.png"))
+            card[side]['image'] = _
+            if side == 'back':
+                card[side]['text'] = self.driver.current_url
+            logger.debug(_)
+            self.driver.save_screenshot(_)
             self.toggle_ai()
-            self.driver.save_screenshot(filename)
+
+
+        logger.debug(f"The extracted and generated {card=}   ")
+
+        ogs_buddy.anki_connect.make_card(
+            card['front']['text'],
+            card['back']['text'],
+            card['front']['image'],
+            card['back']['image']
+        )
 
     def move_next_to_browser(self, window):
         window_size = self.driver.get_window_size()
@@ -111,7 +140,7 @@ def gui_loop(ogs):
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
-        print(f'{event} entered ', values[0])
+        print(f'{event} entered ', values)
 
         if event == 'MakeFlashCard': # if user closes window or clicks cancel
             ogs.make_flashcard()
