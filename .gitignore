@@ -5,6 +5,7 @@ desktop.ini
 pdm.lock
 .pdm.toml
 drivers/*
+20.3
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
