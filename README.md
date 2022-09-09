@@ -22,6 +22,29 @@ Now we are presented with the position in a flashcard
 
 After pressing "show answer" we see the answer and can feedback on how well we did
 
+# Installation
+
+## Download and install the Anki flashcard software
+
+https://apps.ankiweb.net/
+
+### Download and install Anki-connect
+
+https://github.com/FooSoft/anki-connect#installation
+
+## Clone this repo
+
+## Install Python on your machine
+
+# Usage
+
+1. Open a shell
+2. Set your `PYTHONPATH` to the ogs-buddy cloned repo
+3. change directory to the ogs-buddy cloned repo
+4. type `python bin\main.py` to start up OGS Buddy
+5. Startup the Anki flashcard software
+6. Play a game in the browser window after logging in. Or alternatively browse to any game and then let the AI review it.
+7. When you see a position you want to remember, click "Make Flashcard". Remember: you click "make flashcard' when the screen is showing the analysis
 
 # References
 
