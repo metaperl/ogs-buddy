@@ -18,6 +18,8 @@ from PIL import Image
 from autoselenium import Driver
 
 from traitlets import HasTraits, Int, Unicode, default, Any    
+from traitlets.config import Application
+
 import PySimpleGUI as sg
 
 
@@ -29,7 +31,6 @@ def move_upper_right(window):
     win_width, win_height = window.size
     x, y = (screen_width - win_width), 0
     window.move(x, y)
-
 
 
 def filename_from_url(url, append=None):
@@ -53,7 +54,10 @@ def filename_from_url(url, append=None):
 
     return filename
 
-class OGS(HasTraits):
+
+
+class BrowserWindow(HasTraits):
+    """Web browser window controlled by this application through Selenium."""
 
     driver = Any()
     url = Unicode("https://online-go.com/game/46749656")
@@ -123,41 +127,54 @@ element.parentNode.removeChild(element);
         window.move(window_size['width'], 300)
 
 
+class GUI(HasTraits):
+    """User interface to faciliate interacting with the BrowserWindow."""
 
-def main():
-    with Driver('chrome', root='drivers') as driver:
-        ogs = OGS(driver=driver)
-        ogs.begin()
+    browser_window = BrowserWindow()
 
-        gui_loop(ogs)
+    def gui_loop(self):
+        sg.theme('DarkAmber')   # Add a touch of color
+        # All the stuff inside your window.
+        layout = [ 
+                    [sg.Text(' ' * 60)],
+                    [sg.Button('BookmarkAsHome')],
+                    [sg.Text(' ' * 60)],
+                    [sg.Button('MakeFlashCard'), sg.Button('Exit')],
+                    [sg.Text('')]
+                    ]
 
+        # Create the Window
+        window = sg.Window('OGS BUDDY', layout, finalize=True)
 
-def gui_loop(ogs):
-    sg.theme('DarkAmber')   # Add a touch of color
-    # All the stuff inside your window.
-    layout = [ 
-              [sg.Text(' ' * 60)],
+        # Move this GUI next to the browser window
+        self.browser_window.move_next_to_browser(window)
 
-                [sg.Button('MakeFlashCard'), sg.Button('Exit')],
-                 [sg.Text('')]
-                 ]
+        # Event Loop to process "events" and get the "values" of the inputs
+        while True:
+            event, values = window.read()
+            print(f'{event} entered ', values)
 
-    # Create the Window
-    window = sg.Window('OGS BUDDY', layout, finalize=True)
-    ogs.move_next_to_browser(window)
-    # Event Loop to process "events" and get the "values" of the inputs
-    while True:
-        event, values = window.read()
-        print(f'{event} entered ', values)
+            if event == 'MakeFlashCard': # if user closes window or clicks cancel
+                self.browser_window.make_flashcard()
+            if event == sg.WIN_CLOSED or event == 'Exit': # if user closes window or clicks cancel
+                break
 
-        if event == 'MakeFlashCard': # if user closes window or clicks cancel
-            ogs.make_flashcard()
-        if event == sg.WIN_CLOSED or event == 'Exit': # if user closes window or clicks cancel
-            break
+        window.close()
 
-    window.close()
+class OGSBuddy(Application):
+    """Tool that opens a BrowserWindow that a user controls via a GUI."""
 
+    browser_window = BrowserWindow()
+    gui = GUI()
+
+    def start(self):
+        GUI.browser_window = self.browser_window
+        with Driver('chrome', root='drivers') as driver:
+            self.browser_window.driver = driver
+ 
+            self.browser_window.begin()
+            self.gui.gui_loop()
 
 if __name__ == '__main__':
-    main()
+    OGSBuddy.launch_instance()
     
