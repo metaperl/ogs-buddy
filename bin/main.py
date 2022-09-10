@@ -12,13 +12,13 @@ import time
 from loguru import logger
 import ogs_buddy.anki_connect
 
-from PIL import Image
 
 # Here Chrome will be used
-from autoselenium import Driver
+from autoselenium import Firefox
 
 from traitlets import HasTraits, Int, Unicode, default, Any    
 from traitlets.config import Application
+from pathlib import Path
 
 import PySimpleGUI as sg
 
@@ -161,19 +161,22 @@ class GUI(HasTraits):
 
         window.close()
 
+             
+
 class OGSBuddy(Application):
     """Tool that opens a BrowserWindow that a user controls via a GUI."""
 
     browser_window = BrowserWindow()
     gui = GUI()
+    app_home = Path()
 
     def start(self):
-        GUI.browser_window = self.browser_window
-        with Driver('chrome', root='drivers') as driver:
-            self.browser_window.driver = driver
- 
-            self.browser_window.begin()
-            self.gui.gui_loop()
+        self.gui.browser_window = self.browser_window
+        driver = Firefox()
+        self.browser_window.driver = driver
+
+        self.browser_window.begin()
+        self.gui.gui_loop()
 
 if __name__ == '__main__':
     OGSBuddy.launch_instance()
