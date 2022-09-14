@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 import tempfile
 
 import os.path
+import sys
+import traceback
 
 import time
 from loguru import logger
@@ -14,7 +16,7 @@ import ogs_buddy.anki_connect
 
 
 # Here Chrome will be used
-from autoselenium import Firefox
+from autoselenium import Driver
 
 from traitlets import HasTraits, Int, Unicode, default, Any    
 from traitlets.config import Application
@@ -54,6 +56,17 @@ def filename_from_url(url, append=None):
 
     return filename
 
+class UserData(HasTraits):
+
+    home = Path(Path.home())
+    user_dir = Path()
+
+    @default('user_data'):
+    def _user_dir(self):
+        _ = self.home / ("." + DECK_NAME)
+        _.mkdir(exist_ok=True)
+        return _
+
 
 
 class BrowserWindow(HasTraits):
@@ -63,10 +76,10 @@ class BrowserWindow(HasTraits):
     url = Unicode("https://online-go.com/game/46749656")
 
     def begin(self):
-        self.driver.get(self.url)
-        self.remove_ogs_logo()
-        logger.info("The Anki app must be up and running with anki-connect plugin for OGS Buddy to work its magic.")
-        self.create_deck()
+            self.driver.get(self.url)
+            self.remove_ogs_logo()
+            logger.info("The Anki app must be up and running with anki-connect plugin for OGS Buddy to work its magic.")
+            self.create_deck()
 
 
     @property
@@ -86,7 +99,17 @@ element.parentNode.removeChild(element);
         actions.perform()
 
     def create_deck(self):
-        ogs_buddy.anki_connect.create_deck(DECK_NAME)
+        try:
+            ogs_buddy.anki_connect.create_deck(DECK_NAME)
+        except Exception as e:
+            logger.exception(f"""
+                Could not create or connect to Anki software:
+                1. Is the Anki flashcard software running?
+                2. Have you installed the Anki-connect Flashcard plugin?
+
+                """
+            )
+            sys.exit()
 
     def make_flashcard(self):
         card = {
@@ -168,15 +191,13 @@ class OGSBuddy(Application):
 
     browser_window = BrowserWindow()
     gui = GUI()
-    app_home = Path()
 
     def start(self):
-        self.gui.browser_window = self.browser_window
-        driver = Firefox()
-        self.browser_window.driver = driver
-
-        self.browser_window.begin()
-        self.gui.gui_loop()
+        with Driver('chrome') as driver:
+            self.gui.browser_window = self.browser_window
+            self.browser_window.driver = driver
+            self.browser_window.begin()
+            self.gui.gui_loop()
 
 if __name__ == '__main__':
     OGSBuddy.launch_instance()
